@@ -1,0 +1,4 @@
+#!/bin/sh
+# Runs Signoff from this plugin folder; the arguments are passed on as given.
+# readlink -f: a link to this file (in ~/bin, say) still finds the plugin folder.
+exec python3 -I "$(dirname "$(readlink -f "$0")")/../signoff/signoff.py" "$@"

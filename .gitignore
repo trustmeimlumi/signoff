@@ -1,0 +1,7 @@
+__pycache__/
+.DS_Store
+*.answers.json
+*.answers.md
+# The past-decisions demo keeps its synthetic answers in git.
+!examples/history/**/*.answers.json
+!examples/history/**/*.answers.md

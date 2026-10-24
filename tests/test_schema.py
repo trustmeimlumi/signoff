@@ -1,0 +1,440 @@
+"""The decisions file and the answers are checked before anything is served or written."""
+import copy
+import json
+import os
+import unittest
+
+from support import ROOT, Folder, sample_decisions, signoff
+
+
+class DecisionsFile(unittest.TestCase):
+    def setUp(self):
+        self.folder = Folder()
+
+    def tearDown(self):
+        self.folder.cleanup()
+
+    def broken(self, change):
+        data = sample_decisions()
+        change(data)
+        self.folder.write(data)
+        with self.assertRaises(signoff.DecisionsError) as ctx:
+            signoff.load_decisions(self.folder.decisions)
+        return str(ctx.exception)
+
+    def test_sample_loads(self):
+        decisions, images = signoff.load_decisions(self.folder.decisions)
+        self.assertEqual(decisions["title"], "Pick the settings layout")
+        self.assertEqual(images, [self.folder.path / "mockups" / "a.png"])
+
+    def test_defaults_are_filled(self):
+        data = sample_decisions()
+        del data["items"][0]["select"]
+        del data["free_text"]
+        self.folder.write(data)
+        decisions, _ = signoff.load_decisions(self.folder.decisions)
+        self.assertEqual(decisions["items"][0]["select"], "one")
+        self.assertTrue(decisions["items"][0]["comment"])
+        self.assertFalse(decisions["items"][0]["other"])
+        self.assertFalse(decisions["items"][0]["skippable"])
+        self.assertEqual(decisions["free_text"], {})
+
+    def test_other_and_skippable_must_be_booleans(self):
+        self.assertIn("other", self.broken(lambda d: d["items"][0].update(other="yes")))
+        self.assertIn("skippable", self.broken(lambda d: d["items"][1].update(skippable=1)))
+
+    def test_tab_is_optional_text(self):
+        data = sample_decisions()
+        data["tab"] = "Layout"
+        self.folder.write(data)
+        self.assertEqual(signoff.load_decisions(self.folder.decisions)[0]["tab"], "Layout")
+        self.assertIn("tab", self.broken(lambda d: d.update(tab=["x"])))
+
+    def test_not_json(self):
+        self.folder.decisions.write_text("{nope", encoding="utf-8")
+        with self.assertRaises(signoff.DecisionsError) as ctx:
+            signoff.load_decisions(self.folder.decisions)
+        self.assertIn("not valid JSON", str(ctx.exception))
+
+    def test_too_large_says_so(self):
+        self.folder.decisions.write_text(" " * (signoff.MAX_DECISIONS + 1), encoding="utf-8")
+        with self.assertRaises(signoff.DecisionsError) as ctx:
+            signoff.load_decisions(self.folder.decisions)
+        self.assertIn("larger than", str(ctx.exception))
+        self.assertNotIn("JSON", str(ctx.exception))
+
+    def test_missing_file(self):
+        with self.assertRaises(signoff.DecisionsError):
+            signoff.load_decisions(self.folder.path / "absent.json")
+
+    def test_wrong_version(self):
+        self.assertIn("version", self.broken(lambda d: d.update(version=2)))
+
+    def test_missing_title(self):
+        self.assertIn("title", self.broken(lambda d: d.pop("title")))
+
+    def test_notice_is_optional_text(self):
+        data = sample_decisions()
+        data["notice"] = "Synthetic data only"
+        self.folder.write(data)
+        self.assertEqual(signoff.load_decisions(self.folder.decisions)[0]["notice"], "Synthetic data only")
+        self.assertIn("notice", self.broken(lambda d: d.update(notice=["x"])))
+
+    def test_unknown_top_key(self):
+        self.assertIn("colour", self.broken(lambda d: d.update(colour="red")))
+
+    def test_no_items(self):
+        self.assertIn("items", self.broken(lambda d: d.update(items=[])))
+
+    def test_unknown_item_key_names_the_item(self):
+        msg = self.broken(lambda d: d["items"][1].update(defaultValue="date"))
+        self.assertIn("filters", msg)
+        self.assertIn("defaultValue", msg)
+
+    def test_duplicate_item_id(self):
+        def dup(d):
+            d["items"][1]["id"] = "layout"
+        self.assertIn("duplicate", self.broken(dup))
+
+    def test_bad_item_id(self):
+        self.assertIn("id", self.broken(lambda d: d["items"][0].update(id="has space")))
+
+    def test_id_with_trailing_newline(self):
+        self.assertIn("id", self.broken(lambda d: d["items"][0].update(id="layout\n")))
+
+    def test_lone_surrogate(self):
+        self.folder.decisions.write_text(self.folder.decisions.read_text(encoding="utf-8").replace(
+            '"Pick the settings layout"', '"\\ud800 x"'), encoding="utf-8")
+        with self.assertRaises(signoff.DecisionsError) as ctx:
+            signoff.load_decisions(self.folder.decisions)
+        self.assertIn("character", str(ctx.exception))
+
+    def test_bad_select(self):
+        self.assertIn("select", self.broken(lambda d: d["items"][0].update(select="some")))
+
+    def test_too_few_options(self):
+        self.assertIn("options", self.broken(lambda d: d["items"][0].update(options=[{"id": "x", "label": "X"}])))
+
+    def test_duplicate_option(self):
+        msg = self.broken(lambda d: d["items"][0].update(options=[{"id": "x", "label": "X"}, {"id": "x", "label": "Y"}]))
+        self.assertIn("duplicate", msg)
+
+    def test_recommended_not_an_option(self):
+        self.assertIn("recommended", self.broken(lambda d: d["items"][0].update(recommended="three")))
+
+    def test_recommended_one_must_be_a_string(self):
+        self.assertIn("recommended", self.broken(lambda d: d["items"][0].update(recommended=["two"])))
+
+    def test_recommended_many_must_be_a_list(self):
+        self.assertIn("recommended", self.broken(lambda d: d["items"][1].update(recommended="date")))
+
+    def test_text_must_be_a_string(self):
+        self.assertIn("description", self.broken(lambda d: d["items"][0].update(description=["x"])))
+
+    def test_box_out_of_range(self):
+        msg = self.broken(lambda d: d["items"][0]["images"][0].update(boxes=[[80, 0, 30, 10]]))
+        self.assertIn("boxes", msg)
+
+    def test_box_needs_four_numbers(self):
+        self.assertIn("boxes", self.broken(lambda d: d["items"][0]["images"][0].update(boxes=[[1, 2, 3]])))
+
+    def test_box_rejects_booleans(self):
+        self.assertIn("boxes", self.broken(lambda d: d["items"][0]["images"][0].update(boxes=[[True, 0, 10, 10]])))
+
+    def test_image_missing(self):
+        self.assertIn("not found", self.broken(lambda d: d["items"][0]["images"][0].update(src="mockups/none.png")))
+
+    def test_image_outside_folder(self):
+        outside = self.folder.path.parent / ("outside-%d.png" % os.getpid())
+        outside.write_bytes(b"x")
+        try:
+            msg = self.broken(lambda d: d["items"][0]["images"][0].update(src="../" + outside.name))
+        finally:
+            outside.unlink()
+        self.assertIn("outside", msg)
+
+    def test_absolute_image_outside_folder(self):
+        msg = self.broken(lambda d: d["items"][0]["images"][0].update(src=str(ROOT / "README.md")))
+        self.assertIn("outside", msg)
+
+    @unittest.skipIf(os.name == "nt", "symlinks need extra rights on Windows")
+    def test_symlink_pointing_outside(self):
+        (self.folder.path / "mockups" / "link.png").symlink_to(ROOT / "plugin" / "signoff" / "page.html")
+        msg = self.broken(lambda d: d["items"][0]["images"][0].update(src="mockups/link.png"))
+        self.assertIn("outside", msg)
+
+    def test_svg_rejected(self):
+        (self.folder.path / "mockups" / "a.svg").write_text("<svg/>", encoding="utf-8")
+        msg = self.broken(lambda d: d["items"][0]["images"][0].update(src="mockups/a.svg"))
+        self.assertIn("SVG", msg)
+
+    def test_other_types_rejected(self):
+        (self.folder.path / "mockups" / "a.html").write_text("<p>", encoding="utf-8")
+        msg = self.broken(lambda d: d["items"][0]["images"][0].update(src="mockups/a.html"))
+        self.assertIn("PNG", msg)
+
+
+class Answers(unittest.TestCase):
+    def setUp(self):
+        folder = Folder()
+        self.decisions, _ = signoff.load_decisions(folder.decisions)
+        folder.cleanup()
+
+    def ok(self, state):
+        return signoff.check_answers(state, self.decisions)
+
+    def bad(self, state):
+        with self.assertRaises(ValueError):
+            signoff.check_answers(state, self.decisions)
+
+    def good_state(self):
+        return {"answers": {"layout": {"choice": "one", "comment": "fine"},
+                            "filters": {"choice": ["date"], "comment": ""}},
+                "free_text": "", "done": False}
+
+    def test_good(self):
+        self.assertEqual(self.ok(self.good_state())["answers"]["layout"]["choice"], "one")
+
+    def test_partial_is_fine(self):
+        self.ok({"answers": {}, "free_text": "", "done": False})
+
+    def test_empty_many_and_no_one_choice(self):
+        state = self.good_state()
+        state["answers"]["filters"]["choice"] = []
+        state["answers"]["layout"]["choice"] = None
+        self.ok(state)
+
+    def test_unknown_item(self):
+        state = self.good_state()
+        state["answers"]["ghost"] = {"choice": "one", "comment": ""}
+        self.bad(state)
+
+    def test_unknown_option(self):
+        state = self.good_state()
+        state["answers"]["layout"]["choice"] = "three"
+        self.bad(state)
+
+    def test_list_for_single_choice(self):
+        state = self.good_state()
+        state["answers"]["layout"]["choice"] = ["one"]
+        self.bad(state)
+
+    def test_duplicates_in_many(self):
+        state = self.good_state()
+        state["answers"]["filters"]["choice"] = ["date", "date"]
+        self.bad(state)
+
+    def test_long_comment(self):
+        state = self.good_state()
+        state["answers"]["layout"]["comment"] = "x" * (signoff.MAX_TEXT + 1)
+        self.bad(state)
+
+    def test_long_free_text(self):
+        state = self.good_state()
+        state["free_text"] = "x" * (signoff.MAX_TEXT + 1)
+        self.bad(state)
+
+    def test_extra_key(self):
+        state = self.good_state()
+        state["script"] = "x"
+        self.bad(state)
+
+    def test_done_must_be_bool(self):
+        state = self.good_state()
+        state["done"] = "yes"
+        self.bad(state)
+
+    def test_not_an_object(self):
+        self.bad(["x"])
+
+    def test_source_is_recorded(self):
+        state = self.good_state()
+        state["answers"]["layout"]["source"] = "accept_all"
+        state["answers"]["filters"]["source"] = "user"
+        clean = self.ok(state)
+        self.assertEqual(clean["answers"]["layout"]["source"], "accept_all")
+        self.assertEqual(clean["answers"]["filters"]["source"], "user")
+
+    def test_source_values(self):
+        for value in signoff.SOURCE_VALUES:
+            state = self.good_state()
+            state["answers"]["layout"]["source"] = value
+            self.ok(state)
+        state = self.good_state()
+        state["answers"]["layout"]["source"] = "agent"
+        self.bad(state)
+
+    def test_stored_file_may_carry_version_and_saved(self):
+        state = self.good_state()
+        state.update(version=1, saved="2026-01-01T00:00:00Z")
+        signoff.check_answers(state, self.decisions, stored=True)
+        self.bad(copy.deepcopy(state))
+
+
+class OtherAndSkip(unittest.TestCase):
+    def setUp(self):
+        folder = Folder()
+        data = sample_decisions()
+        for item in data["items"]:
+            item.update(other=True, skippable=True)
+        folder.write(data)
+        self.decisions, _ = signoff.load_decisions(folder.decisions)
+        folder.cleanup()
+
+    def check(self, layout=None, filters=None):
+        answers = {}
+        if layout is not None:
+            answers["layout"] = dict({"comment": ""}, **layout)
+        if filters is not None:
+            answers["filters"] = dict({"comment": ""}, **filters)
+        return signoff.check_answers({"answers": answers, "free_text": "", "done": False}, self.decisions)
+
+    def bad(self, **kw):
+        with self.assertRaises(ValueError):
+            self.check(**kw)
+
+    def test_other_with_its_text(self):
+        clean = self.check(layout={"choice": "_other", "other": "three columns"},
+                           filters={"choice": ["date", "_other"], "other": "Colour"})
+        self.assertEqual(clean["answers"]["layout"], {"choice": "_other", "other": "three columns", "comment": ""})
+        self.assertEqual(clean["answers"]["filters"]["other"], "Colour")
+
+    def test_other_without_text_is_empty_text(self):
+        self.assertEqual(self.check(layout={"choice": "_other"})["answers"]["layout"]["other"], "")
+
+    def test_skip(self):
+        clean = self.check(layout={"choice": "_skip"}, filters={"choice": ["_skip"]})
+        self.assertEqual(clean["answers"]["layout"]["choice"], "_skip")
+        self.assertEqual(clean["answers"]["filters"]["choice"], ["_skip"])
+
+    def test_skip_is_alone(self):
+        self.bad(filters={"choice": ["_skip", "date"]})
+        self.bad(filters={"choice": ["_skip", "_other"], "other": "x"})
+
+    def test_other_text_needs_other_chosen(self):
+        self.bad(layout={"choice": "one", "other": "x"})
+        self.bad(layout={"choice": "_skip", "other": "x"})
+
+    def test_other_text_limits(self):
+        self.bad(layout={"choice": "_other", "other": 3})
+        self.bad(layout={"choice": "_other", "other": "x" * (signoff.MAX_TEXT + 1)})
+
+    def test_only_when_the_item_allows_it(self):
+        folder = Folder()
+        try:
+            decisions, _ = signoff.load_decisions(folder.decisions)
+        finally:
+            folder.cleanup()
+        for choice in ("_other", "_skip"):
+            with self.assertRaises(ValueError):
+                signoff.check_answers({"answers": {"layout": {"choice": choice, "comment": ""}}, "free_text": "",
+                                       "done": False}, decisions)
+
+    def test_markdown_shows_other_and_skip(self):
+        record = {"answers": {"layout": {"choice": "_other", "other": "three *columns*", "comment": ""},
+                              "filters": {"choice": ["_skip"], "comment": ""}},
+                  "free_text": "", "done": False, "saved": "2026-01-01T12:00:00Z"}
+        md = signoff.answers_markdown(self.decisions, record)
+        self.assertIn("- Choice: Other: three \\*columns\\* (not recommended)", md)
+        self.assertIn("- Choice: Skipped (not recommended)", md)
+
+    def test_markdown_without_a_recommendation_says_nothing_about_it(self):
+        decisions = dict(self.decisions, items=[dict(self.decisions["items"][0])])
+        del decisions["items"][0]["recommended"]
+        record = {"answers": {"layout": {"choice": "one", "comment": ""}}, "free_text": "", "done": False,
+                  "saved": "2026-01-01T12:00:00Z"}
+        md = signoff.answers_markdown(decisions, record)
+        self.assertIn("- Choice: Keep one\n", md)
+        self.assertNotIn("recommended)", md)
+
+
+class StoredAnswers(unittest.TestCase):
+    def setUp(self):
+        folder = Folder()
+        self.decisions, _ = signoff.load_decisions(folder.decisions)
+        folder.cleanup()
+
+    def stored(self, **change):
+        record = {"version": 1, "done": True, "saved": "2026-01-01T12:00:00Z", "answers": {}, "free_text": ""}
+        record.update(change)
+        return signoff.check_answers(record, self.decisions, stored=True)
+
+    def test_good(self):
+        self.stored()
+        self.stored(decisions={"file": "decisions.json", "sha256": "0" * 64})
+
+    def test_acceptance_is_checked(self):
+        self.stored(accepted=True, accepted_at="2026-01-01T12:00:00Z", changed_after_accept=False)
+        for change in ({"accepted": "yes"}, {"accepted_at": "noon"}, {"changed_after_accept": 1}):
+            with self.assertRaises(ValueError, msg=change):
+                self.stored(**change)
+        with self.assertRaises(ValueError):
+            signoff.check_answers({"answers": {}, "free_text": "", "done": False, "accepted": 1}, self.decisions)
+        self.assertTrue(signoff.check_answers({"answers": {}, "free_text": "", "done": False, "accepted": True},
+                                              self.decisions)["accepted"])
+
+    def test_version_and_saved_are_checked(self):
+        for change in ({"version": 2}, {"version": True}, {"saved": "<b>yesterday</b>"}, {"saved": 5},
+                       {"decisions": {"file": "x.json"}}, {"decisions": {"file": "x.json", "sha256": "zz"}}):
+            with self.assertRaises(ValueError, msg=change):
+                self.stored(**change)
+        with self.assertRaises(ValueError):
+            signoff.check_answers({"done": True, "answers": {}, "free_text": ""}, self.decisions, stored=True)
+
+
+class SchemaFile(unittest.TestCase):
+    """schema.json documents the format; this keeps it in step with the checks in signoff.py."""
+
+    def setUp(self):
+        self.schema = json.loads((ROOT / "plugin" / "signoff" / "schema.json").read_text(encoding="utf-8"))
+        self.defs = self.schema["$defs"]
+
+    def test_top_level(self):
+        self.assertEqual(set(self.schema["properties"]), set(signoff.TOP_KEYS))
+        self.assertEqual(set(self.schema["required"]), set(signoff.TOP_REQUIRED))
+        self.assertFalse(self.schema["additionalProperties"])
+
+    def test_item(self):
+        item = self.defs["item"]
+        self.assertEqual(set(item["properties"]), set(signoff.ITEM_KEYS))
+        self.assertEqual(set(item["required"]), set(signoff.ITEM_REQUIRED))
+        self.assertEqual(item["properties"]["select"]["enum"], list(signoff.SELECT_VALUES))
+        self.assertEqual(item["properties"]["id"]["pattern"], signoff.ID_PATTERN.pattern)
+
+    def test_image_and_option(self):
+        self.assertEqual(set(self.defs["image"]["properties"]), set(signoff.IMAGE_KEYS))
+        self.assertNotIn("required", self.defs["image"])
+        self.assertEqual([alt["required"] for alt in self.defs["image"]["oneOf"]], [["src"], ["html"]])
+        self.assertEqual(set(self.defs["option"]["properties"]), set(signoff.OPTION_KEYS))
+        self.assertEqual(set(self.defs["option"]["required"]), {"id", "label"})
+        self.assertEqual(set(self.schema["properties"]["free_text"]["properties"]), set(signoff.FREE_TEXT_KEYS))
+
+    def test_sample_follows_the_schema_shape(self):
+        # The demo file must load, so the README's example is a real one.
+        decisions, images = signoff.load_decisions(ROOT / "examples" / "demo" / "decisions.json")
+        self.assertTrue(images)
+        self.assertGreaterEqual(len(decisions["items"]), 4)
+
+    def test_history_demo(self):
+        server = signoff.make_history_server(ROOT / "examples" / "history")
+        try:
+            got = [(e["file"], e["status"], bool(e["outcome"]), bool(e["warning"])) for e in server.entries]
+        finally:
+            server.server_close()
+        self.assertEqual(got, [("decisions.json", "done", False, True), ("round-02.json", "error", False, False),
+                               ("round-01.json", "done", True, False), ("round-02.json", "done", True, False),
+                               ("round-03.json", "open", False, False)])
+
+    def test_demo_rounds_load_as_tabs(self):
+        server = signoff.make_server(ROOT / "examples" / "demo")
+        try:
+            self.assertEqual([r.path.name for r in server.rounds], ["round-01.json", "round-02.json", "round-03.json", "round-04.json"])
+            items = [it for r in server.rounds for it in r.decisions["items"]]
+            self.assertTrue(any(it["other"] for it in items) and any(it["skippable"] for it in items))
+            self.assertTrue(any(len(it.get("images", [])) == len(it["options"]) > 1 for it in items))
+        finally:
+            server.server_close()
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/trustmeimlumi/signoff/blob/main/plugin/signoff/schema.json",
+  "title": "Signoff decisions file",
+  "description": "A list of decisions for a person to make on a local page. All text is plain text; line breaks are kept, nothing is rendered as HTML or Markdown.",
+  "type": "object",
+  "required": ["version", "title", "items"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 1 },
+    "title": { "type": "string", "description": "The page heading." },
+    "tab": { "type": "string", "description": "A short label for this round's tab when a folder of rounds is served. Default: the title." },
+    "intro": { "type": "string", "description": "One or two sentences under the heading." },
+    "notice": { "type": "string", "description": "A short notice shown as a banner under the header, e.g. \"Synthetic data only\"." },
+    "lang": { "type": "string", "description": "BCP 47 language tag of the content, e.g. \"en\" or \"de\". Default \"en\"." },
+    "items": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/item" } },
+    "free_text": {
+      "type": "object",
+      "description": "The free-text box at the end of the page. It is always shown; this only names it.",
+      "additionalProperties": false,
+      "properties": {
+        "title": { "type": "string", "default": "Anything else" },
+        "placeholder": { "type": "string" }
+      }
+    }
+  },
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$" },
+    "item": {
+      "type": "object",
+      "required": ["id", "title", "options"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$", "description": "Unique and stable: the answers are keyed by it." },
+        "group": { "type": "string", "description": "A heading is shown whenever this changes from the item before." },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "cost": { "type": "string", "description": "What it costs: effort, lines, tokens, money, risk." },
+        "images": { "type": "array", "items": { "$ref": "#/$defs/image" } },
+        "select": { "enum": ["one", "many"], "default": "one", "description": "one: radio buttons. many: checkboxes." },
+        "options": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/option" }, "description": "At least two when select is \"one\"." },
+        "recommended": {
+          "description": "Preselected and labelled. An option id for \"one\", a list of option ids for \"many\".",
+          "oneOf": [
+            { "$ref": "#/$defs/id" },
+            { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/id" } }
+          ]
+        },
+        "comment": { "type": "boolean", "default": true, "description": "Show a comment box under the options." },
+        "other": { "type": "boolean", "default": false, "description": "Add an \"Other\" choice with its own text field. It is recorded as the choice \"_other\", with the text in \"other\"." },
+        "skippable": { "type": "boolean", "default": false, "description": "Add a \"Skip\" choice. It is recorded as the choice \"_skip\", on its own." },
+        "marks": { "type": "boolean", "default": false, "description": "Let the user draw rectangles on this item's pictures, each with a comment. They are recorded in the answer's \"marks\"." }
+      }
+    },
+    "image": {
+      "type": "object",
+      "description": "A picture (src) or a board (html): exactly one of the two.",
+      "oneOf": [ { "required": ["src"] }, { "required": ["html"], "not": { "required": ["boxes"] } } ],
+      "additionalProperties": false,
+      "properties": {
+        "src": { "type": "string", "description": "Path relative to the decisions file. It must stay inside that folder. PNG, JPEG, WebP or GIF; no SVG." },
+        "html": { "type": "string", "description": "A board: one self-contained HTML file relative to the decisions file, inside its folder, up to 2 MiB. Inline CSS and JS, data: images; nothing loads from outside, and it must hold nothing secret. It runs sandboxed and reads ?theme=light or ?theme=dark from its URL." },
+        "caption": { "type": "string" },
+        "alt": { "type": "string", "description": "Text for screen readers. Default: the caption, else the item title." },
+        "boxes": {
+          "type": "array",
+          "description": "Highlight boxes as [x, y, w, h] in percent of the image, the meaning of W3C Media Fragments xywh=percent.",
+          "items": {
+            "type": "array",
+            "minItems": 4,
+            "maxItems": 4,
+            "items": { "type": "number", "minimum": 0, "maximum": 100 }
+          }
+        }
+      }
+    },
+    "option": {
+      "type": "object",
+      "required": ["id", "label"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "label": { "type": "string" },
+        "detail": { "type": "string", "description": "A short line under the label." }
+      }
+    }
+  }
+}

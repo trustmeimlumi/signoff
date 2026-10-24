@@ -1,0 +1,1356 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Signoff</title>
+<style nonce="__NONCE__">
+:root{color-scheme:light;--bg:#F5F5F8;--head:rgba(245,245,248,.9);--panel:#FFFFFF;--line:#E2E1EA;--line2:#CFCDDA;--text:#17151F;
+  --soft:#45414F;--quiet:#5F5B6B;--accent:#5B47C7;--sel:#F0EDFF;--field:#FAFAFC;--box:#E8590C;
+  --boxtext:#B5410A;--boxsoft:#FFF1E8;--dim:rgba(24,20,34,.42);--btn:#5B47C7;--btntext:#FFFFFF;--btnoff:#E6E1FA;
+  --btnofftext:#4A3AA8;--focus:#5B47C7;--mark:#0369A1;--markfill:rgba(3,105,161,.14);--seg:#EAE9F0;--shadow:0 1px 2px rgba(23,21,31,.06),0 1px 1px rgba(23,21,31,.04);
+  --shadow2:0 1px 3px rgba(23,21,31,.12);--tilering:transparent;}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){color-scheme:dark;--bg:#0F0E13;--head:rgba(15,14,19,.88);--panel:#18161F;--line:#2A2733;--line2:#3A3646;--text:#EEECF3;
+  --soft:#B9B5C6;--quiet:#9894A6;--accent:#B9A6FF;--sel:#241F36;--field:#121117;--box:#FF8A57;
+  --boxtext:#FF9D70;--boxsoft:#2C1D18;--dim:rgba(8,6,12,.5);--btn:#B9A6FF;--btntext:#15131C;--btnoff:#2A2540;
+  --btnofftext:#CFC4FF;--focus:#B9A6FF;--mark:#38BDF8;--markfill:rgba(56,189,248,.18);--seg:#1C1A24;--shadow:0 0 0 1px rgba(255,255,255,.02);
+  --shadow2:0 1px 3px rgba(0,0,0,.5);--tilering:#3A3646;}}
+:root[data-theme=dark]{color-scheme:dark;--bg:#0F0E13;--head:rgba(15,14,19,.88);--panel:#18161F;--line:#2A2733;--line2:#3A3646;--text:#EEECF3;
+  --soft:#B9B5C6;--quiet:#9894A6;--accent:#B9A6FF;--sel:#241F36;--field:#121117;--box:#FF8A57;
+  --boxtext:#FF9D70;--boxsoft:#2C1D18;--dim:rgba(8,6,12,.5);--btn:#B9A6FF;--btntext:#15131C;--btnoff:#2A2540;
+  --btnofftext:#CFC4FF;--focus:#B9A6FF;--mark:#38BDF8;--markfill:rgba(56,189,248,.18);--seg:#1C1A24;--shadow:0 0 0 1px rgba(255,255,255,.02);
+  --shadow2:0 1px 3px rgba(0,0,0,.5);--tilering:#3A3646;}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+  padding:0 16px 120px;overflow-wrap:anywhere}
+header{position:sticky;top:0;z-index:5;background:var(--head);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--line);margin:0 -16px;padding:12px 16px;display:flex;gap:8px 16px;align-items:center;flex-wrap:wrap}
+.head-text{flex:1 1 320px;min-width:0}
+h1{font-size:19px;line-height:1.3;margin:0}
+.intro{margin:2px 0 0;color:var(--soft);white-space:pre-line}
+.actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+#status{color:var(--quiet);font-size:13px}
+button{font:inherit;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--text);padding:8px 18px;cursor:pointer}
+button.primary{background:var(--btn);border-color:var(--btn);color:var(--btntext);font-weight:650}
+button:disabled{opacity:.6;cursor:default}
+button:focus-visible,textarea:focus-visible,input[type=text]:focus-visible,a:focus-visible,.item:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+main{max-width:1400px;margin:0 auto}
+h2.group{font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin:32px 0 8px}
+.item{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:18px;background:var(--panel);border:1px solid var(--line);
+  border-radius:14px;padding:16px;margin:12px 0}
+.item.single{grid-template-columns:minmax(0,1fr)}
+@media (max-width:900px){.item{grid-template-columns:minmax(0,1fr)}}
+.shots{display:flex;flex-direction:column;gap:12px;min-width:0}
+figure{margin:0;display:flex;flex-direction:column;gap:4px;min-width:0}
+.frame{position:relative;display:inline-block;align-self:flex-start;max-width:100%;line-height:0;border-radius:8px;overflow:hidden;
+  border:1px solid var(--line)}
+.frame img{display:block;max-width:100%;max-height:620px;width:auto;height:auto}
+.overlay{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none}
+.overlay .dim{fill:var(--dim)}
+.overlay .box{fill:none;stroke:var(--box);stroke-width:3}
+figcaption{font-size:13px;color:var(--quiet)}
+fieldset{border:0;margin:0;padding:0;min-width:0}
+legend{padding:0;margin:0 0 6px;width:100%}
+h3{margin:0;font-size:17px;line-height:1.35}
+.num{color:var(--quiet);font-weight:400;margin-right:6px}
+.desc{color:var(--soft);margin:0 0 10px;white-space:pre-line}
+.cost{font-size:13.5px;color:var(--quiet);margin:0 0 12px;white-space:pre-line}
+.cost strong{color:var(--soft);font-weight:650;margin-right:6px}
+.rec{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.03em;border:1px solid var(--line);border-radius:999px;
+  padding:2px 10px;color:var(--soft);margin:0 0 10px}
+.hint-many{font-size:13px;color:var(--quiet);margin:0 0 8px}
+.choices{display:flex;flex-direction:column;gap:8px}
+.opt{position:relative}
+.opt input{position:absolute;left:13px;top:14px;margin:0;width:18px;height:18px;accent-color:var(--accent)}
+.opt label{display:block;padding:10px 12px 10px 42px;border:1px solid var(--line);border-radius:10px;cursor:pointer;min-height:44px}
+.opt input:checked+label{border-color:var(--accent);background:var(--sel);font-weight:600}
+.opt input:focus-visible+label{outline:3px solid var(--focus);outline-offset:2px}
+.opt .detail{display:block;font-weight:400;color:var(--quiet);font-size:13.5px}
+.tag{display:inline-block;margin-left:8px;font-size:11.5px;font-weight:700;color:var(--accent);letter-spacing:.03em}
+.clabel{display:block;margin:14px 0 4px;font-size:13.5px;color:var(--soft)}
+textarea{display:block;width:100%;min-height:52px;background:var(--field);color:var(--text);border:1px solid var(--line);border-radius:8px;
+  padding:8px 10px;font:inherit;resize:vertical}
+#free{min-height:96px}
+.ftitle{display:block;font-weight:650;font-size:17px;margin:0 0 4px}
+.notice{max-width:1400px;margin:12px auto 0;padding:10px 14px;border-radius:10px;border:1px solid var(--line);
+  border-left:4px solid var(--box);background:var(--panel);font-weight:600;white-space:pre-line}
+.page-intro{display:none}
+@media (max-width:600px){.head-intro,.wide{display:none}.page-intro{display:block;margin:12px 0 0}h1{font-size:17px}}
+.banner{display:none;margin:16px 0 0;padding:12px 16px;border-radius:10px;border:1px solid var(--accent);background:var(--sel)}
+.banner.on{display:block}
+.visually-hidden{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.tabs{display:flex;gap:6px;overflow-x:auto;min-width:0;margin:18px 0 0;padding:4px 4px 0;border-bottom:1px solid var(--line)}
+.tabs [role=tab]{flex:0 0 auto;white-space:nowrap;border-radius:10px 10px 0 0;border-bottom:0;margin-bottom:-1px;background:transparent;
+  color:var(--soft);padding:8px 14px}
+.tabs [role=tab][aria-selected=true]{background:var(--panel);color:var(--text);font-weight:650;border-bottom:1px solid var(--panel)}
+.tick{color:var(--accent);margin-right:6px}
+.readonly-note{margin:16px 0 0;padding:10px 14px;border-radius:10px;border:1px dashed var(--line);color:var(--soft)}
+.opt input.other-text{position:static;display:block;width:calc(100% - 42px);height:auto;margin:6px 0 0 42px;background:var(--field);
+  color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:inherit}
+input.other-text:disabled,textarea:disabled{opacity:.75}
+.help-line{margin:24px 0 0;color:var(--quiet);font-size:13.5px}
+button.link{border:0;background:none;color:var(--accent);padding:4px 0;text-decoration:underline}
+dialog{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:14px;padding:18px 20px;
+  max-width:min(460px,calc(100vw - 32px))}
+dialog::backdrop{background:var(--dim)}
+dialog h2{font-size:17px;margin:0 0 10px}
+dl.keys{display:grid;grid-template-columns:auto 1fr;gap:8px 14px;margin:0 0 16px}
+dl.keys dt{white-space:nowrap}
+dl.keys dd{margin:0;color:var(--soft)}
+.missing{display:flex;align-items:center;justify-content:center;min-height:160px;border:1px dashed var(--line);border-radius:8px;
+  color:var(--quiet);padding:16px;text-align:center}
+.board-bar{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin:0 0 8px}
+.board-label{font-size:12.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--accent)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;border-radius:0;padding:4px 10px;font-size:13px;background:var(--panel);color:var(--soft)}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed=true]{background:var(--sel);color:var(--text);font-weight:650}
+.board-box{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:8px;max-width:100%}
+.board-box iframe{display:block;border:0;transform-origin:0 0;background:transparent}
+.marks{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none}
+.marks.drawing{pointer-events:auto;cursor:crosshair;touch-action:none}
+.marks .mark{fill:var(--markfill);stroke:var(--mark);stroke-width:3;stroke-dasharray:7 4}
+.marks .mark.selected{stroke-width:4;stroke-dasharray:none}
+.marks .mark-num{fill:var(--mark);font:700 14px -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif}
+.mark-tools{display:flex;gap:4px 16px;flex-wrap:wrap;font-size:13.5px}
+.mark-tools a{color:var(--accent)}
+.mark-list .clabel{margin-top:14px}
+.mark-row{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start;margin:6px 0}
+.mark-row textarea{flex:1 1 200px;min-height:60px}
+.mark-handle{padding:6px 10px;font-size:13.5px;border-color:var(--mark)}
+.mark-text{margin:6px 0 0;color:var(--soft);flex:1 1 200px;white-space:pre-line}
+.hint{color:var(--quiet);font-size:13.5px;margin:4px 0}
+.layout.split{display:grid;grid-template-columns:minmax(240px,340px) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:900px){.layout.split{grid-template-columns:minmax(0,1fr)}}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 8px}
+.filters label{display:flex;flex-direction:column;gap:2px;font-size:13px;color:var(--soft);flex:1 1 130px;min-width:0}
+.filters input{font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--field);color:var(--text);min-width:0}
+.filters input:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.h-count{font-size:13px;color:var(--quiet);margin:0 0 8px}
+.h-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.h-entry{width:100%;text-align:left;display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:10px}
+.h-entry[aria-current=true]{border-color:var(--accent);background:var(--sel)}
+.h-top{display:flex;flex-wrap:wrap;gap:2px 8px;font-size:12.5px;color:var(--quiet)}
+.h-title{font-weight:650}
+.h-tab{margin-left:8px;font-weight:400;color:var(--quiet);font-size:13px}
+.h-status{font-size:12px;font-weight:700;letter-spacing:.03em;color:var(--soft)}
+.st-done{color:var(--accent)}
+.st-error,.h-warn{color:var(--box)}
+.h-warn{font-size:12.5px}
+.h-outcome{font-size:13px;color:var(--soft)}
+.outcome{margin:16px 0 0;padding:10px 14px;border-radius:10px;border:1px solid var(--line);border-left:4px solid var(--accent);background:var(--panel)}
+.outcome-log{display:block;color:var(--quiet);font-size:13px}
+.readonly-note.warn{border-style:solid;border-color:var(--box);color:var(--text)}
+.error-text{white-space:pre-wrap;font-size:13px;color:var(--soft)}
+.progress{font-size:13px;font-weight:650;color:var(--soft)}
+button.primary[aria-disabled=true]{cursor:not-allowed}
+.reason{font-size:13px;flex:1 0 100%;text-align:right;padding:0}
+.accept-row{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:flex-end;margin:16px 0 0}
+.accept-state{margin:0;color:var(--soft)}
+.accept-state.changed{color:var(--box);font-weight:650}
+button.accept-round{border-color:var(--accent);color:var(--accent);font-weight:650}
+.tabs .changed-mark{color:var(--box);margin-right:6px;font-weight:700}
+.summary-round{margin:20px 0 0}
+.summary-round h2{font-size:16px;margin:0 0 8px}
+.summary-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.summary-list li{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.summary-list li.flag{border-left:4px solid var(--box)}
+.summary-choice{display:block;color:var(--soft);margin:2px 0 0}
+.badge{display:inline-block;font-size:12px;font-weight:650;border:1px solid var(--line);border-radius:999px;padding:1px 8px;
+  margin:4px 6px 0 0;color:var(--text)}
+.summary-done{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:flex-end;margin:20px 0 0}
+@media (max-width:600px){.reason{text-align:left}}
+kbd{font:12.5px/1.2 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;border:1px solid var(--line);border-bottom-width:2px;
+  border-radius:5px;padding:1px 6px;background:var(--field)}
+/* ---- facelift: precise (Linear-leaning: compact, hairline, segmented tabs) ---- */
+[hidden]{display:none!important}
+body{font-size:14.5px;letter-spacing:-.003em}
+header{padding:10px 16px;gap:6px 14px}
+h1{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:650;letter-spacing:-.012em}
+/* the icon in CSS: dark tile, orange frame, purple dot (img-src 'self' rules out a data: URI) */
+h1::before{content:"";flex:0 0 22px;height:22px;border-radius:6px;
+  background:radial-gradient(circle at 15.5px 15px,#B9A6FF 0 4.5px,transparent 5px),
+    linear-gradient(#FF8A57,#FF8A57) 4px 5px/11px 2px no-repeat,linear-gradient(#FF8A57,#FF8A57) 4px 12px/11px 2px no-repeat,
+    linear-gradient(#FF8A57,#FF8A57) 4px 5px/2px 9px no-repeat,linear-gradient(#FF8A57,#FF8A57) 13px 5px/2px 9px no-repeat,#15131C;
+  box-shadow:0 0 0 1px var(--tilering)}
+.intro{font-size:13.5px}
+.head-intro{padding-left:32px}
+button{border-radius:7px;padding:7px 14px;border-color:var(--line2);box-shadow:var(--shadow)}
+button.primary{background:var(--btn);border-color:var(--btn);color:var(--btntext);font-weight:600}
+button.primary[aria-disabled=true]{opacity:1;background:var(--btnoff);border-color:var(--btnoff);color:var(--btnofftext);box-shadow:none}
+button.link{box-shadow:none}
+.progress{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--soft);background:var(--seg);
+  border-radius:999px;padding:3px 10px}
+.progress::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--accent)}
+.notice{border-radius:8px;border:1px solid var(--line);border-left:3px solid var(--box);background:var(--boxsoft);font-weight:550;
+  font-size:13.5px;padding:8px 12px}
+.tabs{display:inline-flex;max-width:100%;gap:2px;margin:16px 0 0;padding:3px;border:0;border-radius:10px;background:var(--seg)}
+.tabs [role=tab]{border:0;margin:0;border-radius:8px;padding:6px 12px;font-size:13.5px;box-shadow:none;color:var(--soft)}
+.tabs [role=tab][aria-selected=true]{background:var(--panel);border:0;box-shadow:var(--shadow2);color:var(--text);font-weight:600}
+.tick,.tabs .changed-mark{display:inline-grid;place-items:center;width:16px;height:16px;border-radius:50%;font-size:10.5px;font-weight:700;
+  margin-right:6px;vertical-align:middle;position:relative;top:-1px}
+.tick{background:var(--accent);color:var(--panel)}
+.tabs .changed-mark{background:var(--boxsoft);color:var(--boxtext);box-shadow:inset 0 0 0 1px var(--box)}
+h2.group{display:flex;align-items:center;gap:10px;font-size:11.5px;font-weight:650;letter-spacing:.09em;margin:26px 0 6px}
+h2.group::after{content:"";flex:1;height:1px;background:var(--line)}
+.item{border-radius:12px;padding:18px;gap:20px;margin:10px 0;box-shadow:var(--shadow)}
+.frame,.board-box{border-radius:8px;border-color:var(--line2)}
+h3{font-size:16px;font-weight:650;letter-spacing:-.01em}
+.num{display:inline-block;font:600 12px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--accent);background:var(--sel);
+  border-radius:5px;padding:4px 6px;margin-right:8px;vertical-align:2px}
+.desc{font-size:14px}
+.cost{display:flex;gap:8px;align-items:baseline;font-size:13px}
+.cost strong{flex:0 0 auto;white-space:nowrap;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--quiet)}
+.rec{display:inline-flex;align-items:center;gap:6px;border:0;background:var(--sel);color:var(--accent);font-size:12px;font-weight:650;
+  letter-spacing:0;padding:3px 10px 3px 8px}
+.rec::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.choices{gap:6px}
+.opt input{top:12px;width:16px;height:16px}
+.opt label{border-radius:8px;padding:8px 12px 8px 40px;min-height:40px;font-size:14px;background:var(--panel)}
+.opt input:checked+label{border-color:var(--accent);background:var(--sel);box-shadow:inset 0 0 0 1px var(--accent);font-weight:600}
+.opt .detail{font-size:13px}
+.opt input.other-text{margin-left:40px;width:calc(100% - 40px);border-radius:7px}
+.tag{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--btntext);background:var(--accent);
+  border-radius:4px;padding:1px 5px;vertical-align:1px}
+textarea{border-radius:7px;border-color:var(--line2)}
+.clabel{font-size:12.5px;font-weight:600;color:var(--quiet)}
+.ftitle{font-size:15px}
+.accept-state.changed,.st-error,.h-warn{color:var(--boxtext)}
+.tabs .changed-mark{color:var(--boxtext)}
+button.accept-round{background:var(--sel)}
+.readonly-note{border-radius:8px;font-size:13.5px}
+.summary-round h2{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:650}
+.summary-round h2::after{content:"";flex:1;height:1px;background:var(--line)}
+.summary-list{gap:0;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:var(--shadow)}
+.summary-list li{border:0;border-radius:0;border-top:1px solid var(--line);padding:10px 14px}
+.summary-list li:first-child{border-top:0}
+.summary-list li.flag{border-left:0;box-shadow:inset 3px 0 0 var(--box)}
+.summary-list .link{font-weight:600}
+.badge{border:0;background:var(--seg);color:var(--soft);font-size:11.5px;padding:2px 8px}
+dialog{border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.25)}
+kbd{border-radius:4px}
+@media (prefers-reduced-motion:no-preference){
+  button,.opt label,.tabs [role=tab]{transition:background-color .15s,border-color .15s,box-shadow .15s,color .15s}}
+@media (hover:hover){.opt label:hover{border-color:var(--line2)}.opt input:checked+label:hover{border-color:var(--accent)}
+  .tabs [role=tab]:hover{color:var(--text)}}
+@media (max-width:600px){
+  header{padding:8px 16px}
+  h1{font-size:16px}
+  .actions{gap:8px;width:100%}
+  #status{order:3;flex:1 0 100%;font-size:12px}
+  .actions button{padding:6px 12px;font-size:14px}
+  .reason{font-size:12.5px}
+  .tabs{display:flex}
+  .item{padding:14px;border-radius:10px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="head-text"><h1 id="title"></h1><p class="intro head-intro" id="intro"></p></div>
+  <div class="actions"><span id="status" role="status" aria-live="polite">Not saved yet</span>
+    <button type="button" id="accept-all"><span class="accept"><span id="accept-short">Accept all</span><span class="wide" id="accept-rest"> recommendations</span></span><span class="undo" hidden>Undo accept all</span></button>
+    <span class="progress" id="progress" hidden></span>
+    <button type="button" class="primary" id="done" aria-describedby="done-reason">Done</button></div>
+  <button type="button" class="link reason" id="done-reason" hidden></button>
+</header>
+<p class="notice" id="notice" role="note" hidden></p>
+<main>
+  <div class="tabs" id="tabs" role="tablist" hidden></div>
+  <p class="intro page-intro" id="intro-phone"></p>
+  <p class="banner" id="banner" role="alert"></p>
+  <div class="layout" id="layout">
+    <div class="history" id="history" hidden>
+      <div class="filters">
+        <label><span id="h-text-label">Search</span><input type="search" id="h-text"></label>
+        <label><span id="h-from-label">From</span><input type="text" id="h-from" inputmode="numeric" maxlength="10" placeholder="YYYY-MM-DD" autocomplete="off"></label>
+      </div>
+      <p class="h-count" id="h-count" role="status"></p>
+      <ul class="h-list" id="h-list"></ul>
+    </div>
+    <div id="panels"></div>
+  </div>
+  <p class="help-line"><button type="button" class="link" id="help-open">Keyboard shortcuts</button></p>
+</main>
+<dialog id="help" aria-labelledby="help-title">
+  <h2 id="help-title">Keyboard shortcuts</h2>
+  <dl class="keys" id="help-keys"></dl>
+  <button type="button" id="help-close">Close</button>
+</dialog>
+<script type="application/json" id="signoff-data">__DATA__</script>
+<script nonce="__NONCE__">
+(function () {
+  'use strict';
+  var SVG = 'http://www.w3.org/2000/svg';
+  var MAX_TEXT = 20000;  // the server refuses longer text
+  var MAX_MARKS = 50;
+  var OTHER = '_other', SKIP = '_skip';  // option ids never start with "_"
+  var VIEWPORTS = [1280, 768, 390];
+  var LABELS = {
+    en: {done: 'Done', doneRounds: 'Done ({n} rounds)', acceptShort: 'Accept all', acceptRest: ' recommendations',
+      undo: 'Undo accept all', recommended: 'Recommended', recommendedList: 'Recommended: ', cost: 'Cost',
+      comment: 'Comment (optional)', many: 'Select all that apply.', other: 'Other', otherText: 'Other: your answer',
+      skip: 'Skip', anything: 'Anything else', notSaved: 'Not saved yet', saving: 'Saving…', saved: 'Saved {t}',
+      resumed: 'Resumed from your saved answers', tooLarge: 'Could not save: the text is too long.',
+      couldNot: 'Could not save ({s}).', bad: 'Could not save: {m}', offline: 'Could not save: Signoff is not answering. Check that it is still running.',
+      already: 'This round is already done.', doneBanner: 'Done. Your answers are saved and the agent has them; you can close this tab.',
+      readonly: 'This round is done; its answers are shown read only.', doneTab: ' (done)', rounds: 'Rounds',
+      keys: 'Keyboard shortcuts', close: 'Close', kPick: 'pick option 1 to 9 of the current item (Other and Skip come last)',
+      kMove: 'next or previous item', kTabs: 'on the tabs: the previous or next round', kMark: 'on a mark: move it; with Shift, resize it',
+      kHelp: 'show this list', kClose: 'close this list',
+      stale: 'Changed in another tab or window, so this tab can no longer save. Copy any text you have not saved yet, then reload to see the latest answers.',
+      acceptRound: 'Accept this round', accepted: 'accepted', acceptedNote: 'Accepted. If you change anything, accept it again.',
+      changedNote: 'Changed since you accepted it: accept it again.', progress: '{n}/{t} accepted',
+      acceptedTab: ' (accepted)', changedTab: ' (changed since accepted)', missingOne: 'Round {r} not accepted yet',
+      missingMany: '{n} rounds not accepted yet; next: {r}', summary: 'Summary',
+      summaryIntro: 'Every answer in one list. Accept each round, then press Done.',
+      differs: 'not the recommendation', otherBadge: 'Other', skipped: 'Skipped', marksBadge: '{n} marks', markBadge: '1 mark',
+      commentBadge: 'comment', nothing: 'nothing chosen', notAccepted: 'not accepted yet',
+      kAccept: 'accept the open round (Cmd+Enter on a Mac); with a single round, Done',
+      light: 'Light', dark: 'Dark', theme: 'Theme', width: 'Width', board: 'Live mockup',
+      missing: 'Picture not shown: {r}', full: 'Open full size', addMark: 'Add a mark to picture {n}',
+      marks: 'Your marks', markHint: 'Draw a rectangle on a picture to point at something, or use the Add a mark button.',
+      mark: 'Mark {n}', markOn: 'on picture {p}', markHandle: 'Mark {n} on picture {p}. Arrow keys move it, Shift and arrow keys resize it.',
+      markComment: 'Comment on mark {n}', remove: 'Remove', noMarks: 'No marks.',
+      historyTitle: 'Past decisions: {root}', historyIntro: 'Every round under this project, newest first. Pick one to see it as it was answered.',
+      historyNotice: 'Read only. Close it with Ctrl+C in the terminal; it also stops after {m} idle minutes.',
+      historyNoticeNever: 'Read only. Close it with Ctrl+C in the terminal.',
+      search: 'Search', from: 'From', fromHint: 'YYYY-MM-DD', count: '{n} of {t} rounds', none: 'No round matches.',
+      st_done: 'done', st_open: 'open', st_new: 'not answered', st_error: 'cannot be read',
+      outcome: 'Outcome', logged: 'logged in {log}, {date}', warning: 'Warning', error: 'This file cannot be read.',
+      pick: 'Pick a round from the list.'},
+    hu: {done: 'Kész', doneRounds: 'Kész ({n} kör)', acceptShort: 'Javaslatok elfogadása', acceptRest: '',
+      undo: 'Elfogadás visszavonása', recommended: 'Javasolt', recommendedList: 'Javaslat: ', cost: 'Költség',
+      comment: 'Megjegyzés (nem kötelező)', many: 'Több is választható.', other: 'Egyéb', otherText: 'Egyéb: a te válaszod',
+      skip: 'Kihagyom', anything: 'Bármi más', notSaved: 'Még nincs mentve', saving: 'Mentés…', saved: 'Mentve: {t}',
+      resumed: 'Folytatás a mentett válaszokból', tooLarge: 'Nem sikerült menteni: túl hosszú a szöveg.',
+      couldNot: 'Nem sikerült menteni ({s}).', bad: 'Nem sikerült menteni: {m}', offline: 'Nem sikerült menteni. Fut még a Signoff?',
+      already: 'Ez a kör már lezárult.', doneBanner: 'Kész. A válaszaid mentve vannak, és az ágens megkapta őket; ezt a lapot bezárhatod.',
+      readonly: 'Ez a kör lezárult; a válaszai csak olvashatók.', doneTab: ' (kész)', rounds: 'Körök',
+      keys: 'Billentyűparancsok', close: 'Bezárás', kPick: 'az aktuális tétel 1–9. lehetősége (az Egyéb és a Kihagyom a végén)',
+      kMove: 'következő vagy előző tétel', kTabs: 'a füleken: előző vagy következő kör', kMark: 'jelölésen: mozgatás; Shifttel átméretezés',
+      kHelp: 'a lista megjelenítése', kClose: 'a lista bezárása',
+      stale: 'Egy másik lapon vagy ablakban módosult. Töltsd újra az oldalt a legfrissebb válaszokért; ez a lap már nem tud menteni. Az újratöltés előtt másold ki a még nem mentett szövegedet.',
+      acceptRound: 'Kör elfogadása', accepted: 'elfogadva', acceptedNote: 'Elfogadva. Ha bármit módosítasz, újra el kell fogadni.',
+      changedNote: 'Az elfogadás óta módosult: fogadd el újra.', progress: '{n}/{t} elfogadva',
+      acceptedTab: ' (elfogadva)', changedTab: ' (elfogadás óta módosult)', missingOne: 'Még nincs elfogadva: {r}',
+      missingMany: '{n} kör még nincs elfogadva; a következő: {r}', summary: 'Összegzés',
+      summaryIntro: 'Minden válasz egy helyen. Fogadj el minden kört, aztán nyomd meg a Kész gombot.',
+      differs: 'eltér a javaslattól', otherBadge: 'Egyéb', skipped: 'Kihagyva', marksBadge: '{n} jelölés', markBadge: '1 jelölés',
+      commentBadge: 'megjegyzés', nothing: 'nincs választás', notAccepted: 'még nincs elfogadva',
+      kAccept: 'a nyitott kör elfogadása (Macen Cmd+Enter); egyetlen körnél: Kész',
+      light: 'Világos', dark: 'Sötét', theme: 'Téma', width: 'Szélesség', board: 'Élő makett',
+      missing: 'A kép nem látható: {r}', full: 'Megnyitás teljes méretben', addMark: 'Jelölés hozzáadása a(z) {n}. képhez',
+      marks: 'A jelöléseid', markHint: 'Rajzolj téglalapot a képre, hogy megmutass valamit, vagy használd a Jelölés hozzáadása gombot.',
+      mark: '{n}. jelölés', markOn: 'a(z) {p}. képen', markHandle: '{n}. jelölés a(z) {p}. képen. A nyilak mozgatják, a Shift és a nyilak átméretezik.',
+      markComment: 'Megjegyzés a(z) {n}. jelöléshez', remove: 'Törlés', noMarks: 'Nincs jelölés.',
+      historyTitle: 'Korábbi döntések: {root}', historyIntro: 'A projekt minden köre, a legújabb elöl. Válassz egyet: úgy jelenik meg, ahogy megválaszolták.',
+      historyNotice: 'Csak olvasható. A terminálban Ctrl+C zárja be; {m} perc tétlenség után magától is leáll.',
+      historyNoticeNever: 'Csak olvasható. A terminálban Ctrl+C zárja be.',
+      search: 'Keresés', from: 'Ettől', fromHint: 'ÉÉÉÉ-HH-NN', count: '{n} / {t} kör', none: 'Egy kör sem felel meg.',
+      st_done: 'kész', st_open: 'nyitott', st_new: 'megválaszolatlan', st_error: 'nem olvasható',
+      outcome: 'Eredmény', logged: 'naplózva: {log}, {date}', warning: 'Figyelem', error: 'Ez a fájl nem olvasható.',
+      pick: 'Válassz egy kört a listából.'}
+  };
+  var data = JSON.parse(document.getElementById('signoff-data').textContent);
+  var historyMode = data.mode === 'history';
+  var rounds = historyMode ? data.entries : data.rounds;
+  var root = document.documentElement;
+  var theme = location.hash.slice(1);
+  if (theme === 'dark' || theme === 'light') root.setAttribute('data-theme', theme);
+  var first = rounds.filter(function (r) { return r.decisions; })[0];
+  var lang = String((first && first.decisions.lang) || 'en').replace(/_/g, '-');
+  root.lang = lang;
+  var code = lang.toLowerCase().split('-')[0];
+  var L = Object.prototype.hasOwnProperty.call(LABELS, code) ? LABELS[code] : LABELS.en;
+  function fmt(s, vals) { return s.replace(/\{(\w+)\}/g, function (m, k) { return vals[k]; }); }
+
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text !== undefined && text !== null) e.textContent = text;
+    return e;
+  }
+  function svg(tag, attrs) {
+    var e = document.createElementNS(SVG, tag);
+    Object.keys(attrs).forEach(function (k) { e.setAttribute(k, String(attrs[k])); });
+    return e;
+  }
+  function byId(id) { return document.getElementById(id); }
+  function pageTheme() {
+    var t = root.getAttribute('data-theme');
+    if (t) return t;
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+
+  var status = byId('status'), acceptButton = byId('accept-all'), doneButton = byId('done');
+  status.textContent = L.notSaved;
+  byId('accept-short').textContent = L.acceptShort;
+  byId('accept-rest').textContent = L.acceptRest;
+  acceptButton.querySelector('.undo').textContent = L.undo;
+  byId('help-open').textContent = L.keys;
+  byId('help-title').textContent = L.keys;
+  byId('help-close').textContent = L.close;
+  var editable = [];
+  rounds.forEach(function (r, ri) { if (!r.readonly) editable.push(ri); });
+  doneButton.textContent = editable.length > 1 ? fmt(L.doneRounds, {n: editable.length}) : L.done;
+  // With more than one round to answer, each is accepted on its own and Done waits for all of them.
+  var wizard = !historyMode && editable.length > 1;
+  var accepted = rounds.map(function (r) { return !!r.accepted; });
+  var rev = rounds.map(function (r) { return r.rev || 0; });  // saves of each round this page has seen
+  var changed = rounds.map(function (r) { return !!r.changed; });
+
+  // ---- Pictures, the agent's boxes, the user's marks, and boards ----
+  var imageCount = 0;
+  var markState = rounds.map(function () { return {}; });  // round -> item id -> [{image, box, comment}]
+  var selected = null;  // {ri, item, k}
+
+  function boxRect(b, attrs) {
+    return svg('rect', Object.assign({x: b[0] + '%', y: b[1] + '%', width: b[2] + '%', height: b[3] + '%'}, attrs));
+  }
+  function agentBoxes(boxes) {
+    var id = 'cut' + (imageCount++);
+    var o = svg('svg', {'class': 'overlay', 'aria-hidden': 'true', focusable: 'false'});
+    var mask = svg('mask', {id: id});
+    mask.append(svg('rect', {x: 0, y: 0, width: '100%', height: '100%', fill: 'white'}));
+    var outlines = boxes.map(function (b) {
+      mask.append(boxRect(b, {fill: 'black', rx: 6}));
+      return boxRect(b, {'class': 'box', rx: 6});
+    });
+    var defs = svg('defs', {});
+    defs.append(mask);
+    o.append(defs, svg('rect', {'class': 'dim', width: '100%', height: '100%', mask: 'url(#' + id + ')'}));
+    outlines.forEach(function (r) { o.append(r); });
+    return o;
+  }
+
+  function board(img, item) {
+    var fig = el('figure', 'board');
+    var bar = el('div', 'board-bar');
+    var state = {theme: pageTheme(), width: VIEWPORTS[0]};
+    var box = el('div', 'board-box');
+    var frame = el('iframe');
+    // The board is the agent's own HTML with scripts: no same-origin, so it cannot reach this page or save.
+    frame.setAttribute('sandbox', 'allow-scripts');
+    frame.setAttribute('referrerpolicy', 'no-referrer');
+    frame.title = img.caption || img.alt || item.title;
+    frame.loading = 'lazy';
+    box.append(frame);
+    var HEIGHT = 820;
+    function fit() {
+      var avail = box.clientWidth || state.width;
+      var scale = Math.min(1, avail / state.width);
+      frame.style.width = state.width + 'px';
+      frame.style.height = HEIGHT + 'px';
+      frame.style.transform = 'scale(' + scale + ')';
+      box.style.height = Math.round(HEIGHT * scale) + 'px';
+    }
+    function load() {
+      frame.style.colorScheme = state.theme;
+      frame.src = img.board + '?theme=' + state.theme;
+    }
+    function group(label, values, names, key) {
+      var g = el('div', 'seg');
+      g.setAttribute('role', 'group');
+      g.setAttribute('aria-label', label);
+      values.forEach(function (v, i) {
+        var b = el('button', '', names[i]);
+        b.type = 'button';
+        b.setAttribute('aria-pressed', String(state[key] === v));
+        b.addEventListener('click', function () {
+          state[key] = v;
+          Array.prototype.forEach.call(g.children, function (c, j) { c.setAttribute('aria-pressed', String(j === i)); });
+          if (key === 'theme') load(); else fit();
+        });
+        g.append(b);
+      });
+      return g;
+    }
+    bar.append(el('span', 'board-label', L.board),
+      group(L.theme, ['light', 'dark'], [L.light, L.dark], 'theme'),
+      group(L.width, VIEWPORTS, VIEWPORTS.map(function (v) { return v + ' px'; }), 'width'));
+    fig.append(bar, box);
+    if (img.caption) fig.append(el('figcaption', '', img.caption));
+    load();
+    // Refit whenever the box changes width, including when its tab is first shown.
+    if (window.ResizeObserver) new ResizeObserver(fit).observe(box); else window.addEventListener('resize', fit);
+    fit();
+    return fig;
+  }
+
+  function picture(ri, img, item, k, drawing) {
+    var fig = el('figure');
+    if (img.missing) {
+      fig.append(el('div', 'missing', fmt(L.missing, {r: img.missing})));
+      if (img.caption) fig.append(el('figcaption', '', img.caption));
+      return fig;
+    }
+    // A picture that takes marks is not a link, so drawing on it does not open it.
+    var frame = el(drawing ? 'div' : 'a', 'frame');
+    if (!drawing) {
+      frame.href = img.src;
+      frame.target = '_blank';
+      frame.rel = 'noopener noreferrer';
+    }
+    var pic = el('img');
+    pic.src = img.src;
+    pic.alt = img.alt || img.caption || item.title;
+    pic.loading = 'lazy';
+    pic.draggable = false;
+    frame.append(pic);
+    if (img.boxes && img.boxes.length) frame.append(agentBoxes(img.boxes));
+    if (item.marks) {
+      var layer = svg('svg', {'class': 'marks' + (drawing ? ' drawing' : ''), 'aria-hidden': 'true', focusable: 'false'});
+      layer.dataset.round = ri;
+      layer.dataset.item = item.id;
+      layer.dataset.image = k;
+      frame.append(layer);
+      if (drawing) drawOn(layer, ri, item, k);
+    }
+    fig.append(frame);
+    if (img.caption) fig.append(el('figcaption', '', img.caption));
+    if (drawing) {
+      var tools = el('div', 'mark-tools');
+      var full = el('a', 'link', L.full);
+      full.href = img.src;
+      full.target = '_blank';
+      full.rel = 'noopener noreferrer';
+      var add = el('button', 'link', fmt(L.addMark, {n: k + 1}));
+      add.type = 'button';
+      add.addEventListener('click', function () { addMark(ri, item, k, [40, 40, 20, 20]); });
+      tools.append(add, full);
+      fig.append(tools);
+    }
+    return fig;
+  }
+
+  function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+  function round2(v) { return Math.round(v * 100) / 100; }
+  function drawOn(layer, ri, item, k) {
+    var start = null, temp = null;
+    function at(e) {
+      var r = layer.getBoundingClientRect();
+      return [clamp((e.clientX - r.left) / r.width * 100, 0, 100), clamp((e.clientY - r.top) / r.height * 100, 0, 100)];
+    }
+    function box(a, b) {
+      return [round2(Math.min(a[0], b[0])), round2(Math.min(a[1], b[1])), round2(Math.abs(a[0] - b[0])), round2(Math.abs(a[1] - b[1]))];
+    }
+    layer.addEventListener('pointerdown', function (e) {
+      if (e.button !== 0 || finished || closed[ri]) return;
+      e.preventDefault();
+      layer.setPointerCapture(e.pointerId);
+      start = at(e);
+      temp = boxRect([start[0], start[1], 0, 0], {'class': 'mark new'});
+      layer.append(temp);
+    });
+    layer.addEventListener('pointermove', function (e) {
+      if (!start) return;
+      var b = box(start, at(e));
+      temp.setAttribute('x', b[0] + '%');
+      temp.setAttribute('y', b[1] + '%');
+      temp.setAttribute('width', b[2] + '%');
+      temp.setAttribute('height', b[3] + '%');
+    });
+    function end(e) {
+      if (!start) return;
+      var b = box(start, at(e));
+      start = null;
+      temp.remove();
+      if (b[2] >= 1 && b[3] >= 1) addMark(ri, item, k, b);  // a click is not a mark
+    }
+    layer.addEventListener('pointerup', end);
+    layer.addEventListener('pointercancel', function () { if (start) { start = null; temp.remove(); } });
+  }
+
+  function marksOf(ri, item) { return markState[ri][item.id] || (markState[ri][item.id] = []); }
+  function addMark(ri, item, k, b) {
+    var list = marksOf(ri, item);
+    if (list.length >= MAX_MARKS) return;
+    list.push({image: k, box: b, comment: ''});
+    selected = {ri: ri, id: item.id, n: list.length - 1};
+    drawMarks(ri, item);
+    listMarks(ri, item);
+    var handle = byId(key(ri, item) + '-m' + (list.length - 1));
+    if (handle) handle.focus();
+    later(ri, 250);
+  }
+  function drawMarks(ri, item) {
+    var layers = document.querySelectorAll('svg.marks[data-round="' + ri + '"][data-item="' + item.id + '"]');
+    Array.prototype.forEach.call(layers, function (layer) {
+      Array.prototype.slice.call(layer.querySelectorAll('.mark, .mark-num')).forEach(function (n) { n.remove(); });
+      marksOf(ri, item).forEach(function (m, n) {
+        if (String(m.image) !== layer.dataset.image) return;
+        var on = selected && selected.ri === ri && selected.id === item.id && selected.n === n;
+        layer.append(boxRect(m.box, {'class': 'mark' + (on ? ' selected' : ''), rx: 4}));
+        var label = svg('text', {'class': 'mark-num', x: (m.box[0] + 0.8) + '%', y: (m.box[1] + 0.8) + '%', 'dominant-baseline': 'hanging'});
+        label.textContent = String(n + 1);
+        layer.append(label);
+      });
+    });
+  }
+  function listMarks(ri, item) {
+    var holder = byId(key(ri, item) + '-marks');
+    if (!holder) return;
+    holder.replaceChildren();
+    var list = marksOf(ri, item), ro = rounds[ri].readonly || closed[ri] || finished;
+    if (!list.length) {
+      holder.append(el('p', 'hint', ro ? L.noMarks : L.markHint));
+      return;
+    }
+    list.forEach(function (m, n) {
+      var row = el('div', 'mark-row');
+      var handle = el('button', 'mark-handle', fmt(L.mark, {n: n + 1}) + ' ' + fmt(L.markOn, {p: m.image + 1}));
+      handle.type = 'button';
+      handle.id = key(ri, item) + '-m' + n;
+      handle.setAttribute('aria-label', fmt(L.markHandle, {n: n + 1, p: m.image + 1}));
+      handle.disabled = ro;
+      handle.addEventListener('focus', function () { selected = {ri: ri, id: item.id, n: n}; drawMarks(ri, item); });
+      handle.addEventListener('keydown', function (e) {
+        var d = {ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1]}[e.key];
+        if (!d || e.ctrlKey || e.metaKey || e.altKey) return;
+        e.preventDefault();
+        var b = m.box;
+        if (e.shiftKey) {
+          b[2] = clamp(round2(b[2] + d[0]), 1, 100 - b[0]);
+          b[3] = clamp(round2(b[3] + d[1]), 1, 100 - b[1]);
+        } else {
+          b[0] = clamp(round2(b[0] + d[0]), 0, 100 - b[2]);
+          b[1] = clamp(round2(b[1] + d[1]), 0, 100 - b[3]);
+        }
+        drawMarks(ri, item);
+        later(ri, 400);
+      });
+      row.append(handle);
+      if (ro) {
+        row.append(el('p', 'mark-text', m.comment || '–'));
+      } else {
+        var ta = el('textarea', 'mark-comment');
+        ta.value = m.comment;
+        ta.maxLength = MAX_TEXT;
+        ta.rows = 2;
+        ta.dataset.round = ri;
+        ta.setAttribute('aria-label', fmt(L.markComment, {n: n + 1}));
+        ta.addEventListener('input', function () { m.comment = ta.value; });
+        var rm = el('button', '', L.remove);
+        rm.type = 'button';
+        rm.setAttribute('aria-label', L.remove + ': ' + fmt(L.mark, {n: n + 1}));
+        rm.addEventListener('click', function () {
+          list.splice(n, 1);
+          selected = null;
+          drawMarks(ri, item);
+          listMarks(ri, item);
+          var next = byId(key(ri, item) + '-m' + Math.min(n, list.length - 1));
+          if (next) next.focus();
+          later(ri, 250);
+        });
+        row.append(ta, rm);
+      }
+      holder.append(row);
+    });
+  }
+
+  function media(ri, img, item, k) {
+    if (img.board) return board(img, item);
+    return picture(ri, img, item, k, item.marks && !rounds[ri].readonly);
+  }
+
+  function labelOf(item, id) {
+    for (var i = 0; i < item.options.length; i++) if (item.options[i].id === id) return item.options[i].label;
+    return id;
+  }
+  function hasRec(item) { return item.recommended !== undefined; }
+  function recList(item) { return !hasRec(item) ? [] : (Array.isArray(item.recommended) ? item.recommended : [item.recommended]); }
+  // Element ids come from positions, never from agent ids, so no id can collide with another element's.
+  function key(ri, item) { return 'r' + ri + '-i' + rounds[ri].decisions.items.indexOf(item); }
+  function inputs(ri, item) { return Array.prototype.slice.call(document.getElementsByName(key(ri, item))); }
+
+  function choiceRow(ri, item, suffix, value, text, detail, isRec) {
+    var row = el('div', 'opt');
+    var input = el('input');
+    input.type = item.select === 'many' ? 'checkbox' : 'radio';
+    input.name = key(ri, item);
+    input.value = value;
+    input.id = key(ri, item) + suffix;
+    input.dataset.round = ri;
+    input.dataset.item = item.id;
+    var label = el('label', '', text);
+    label.htmlFor = input.id;
+    if (isRec) label.append(el('span', 'tag', L.recommended));
+    if (detail) label.append(el('span', 'detail', detail));
+    row.append(input, label);
+    return row;
+  }
+
+  function renderItem(ri, item, n) {
+    var card = el('section', 'item');
+    card.tabIndex = -1;  // j and k can land on a read-only item too
+    card.dataset.item = item.id;
+    if (item.images && item.images.length) {
+      var shots = el('div', 'shots');
+      item.images.forEach(function (img, k) { shots.append(media(ri, img, item, k)); });
+      card.append(shots);
+    } else {
+      card.classList.add('single');
+    }
+    var fs = el('fieldset');
+    var legend = el('legend');
+    var h = el('h3');
+    h.append(el('span', 'num', (n + 1) + '.'), document.createTextNode(item.title));
+    legend.append(h);
+    fs.append(legend);
+    if (item.description) fs.append(el('p', 'desc', item.description));
+    if (item.cost) {
+      var cost = el('p', 'cost');
+      cost.append(el('strong', '', L.cost), document.createTextNode(item.cost));
+      fs.append(cost);
+    }
+    var rec = recList(item);
+    if (rec.length) fs.append(el('p', 'rec', L.recommendedList + rec.map(function (r) { return labelOf(item, r); }).join(', ')));
+    if (item.select === 'many') fs.append(el('p', 'hint-many', L.many));
+    var choices = el('div', 'choices');
+    item.options.forEach(function (opt, k) {
+      choices.append(choiceRow(ri, item, '-o' + k, opt.id, opt.label, opt.detail, rec.indexOf(opt.id) >= 0));
+    });
+    if (item.other) {
+      var row = choiceRow(ri, item, '-other', OTHER, L.other);
+      var text = el('input', 'other-text');
+      text.type = 'text';
+      text.id = key(ri, item) + '-t';
+      text.maxLength = MAX_TEXT;
+      text.setAttribute('aria-label', L.otherText);
+      text.dataset.round = ri;
+      text.dataset.item = item.id;
+      text.dataset.pick = key(ri, item) + '-other';  // typing here picks Other
+      row.append(text);
+      choices.append(row);
+    }
+    if (item.skippable) choices.append(choiceRow(ri, item, '-skip', SKIP, L.skip));
+    fs.append(choices);
+    if (item.marks) {
+      var marks = el('div', 'mark-list');
+      marks.append(el('p', 'clabel', L.marks));
+      var holder = el('div');
+      holder.id = key(ri, item) + '-marks';
+      marks.append(holder);
+      fs.append(marks);
+    }
+    if (item.comment) {
+      var cl = el('label', 'clabel', L.comment);
+      cl.htmlFor = key(ri, item) + '-c';
+      var ta = el('textarea');
+      ta.id = cl.htmlFor;
+      ta.maxLength = MAX_TEXT;
+      ta.dataset.round = ri;
+      fs.append(cl, ta);
+    }
+    card.append(fs);
+    return card;
+  }
+
+  function when(stamp) {
+    try { return new Date(stamp).toLocaleString(root.lang); } catch (e) { return stamp; }
+  }
+
+  var panels = byId('panels'), tabs = byId('tabs');
+  var sources = rounds.map(function () { return {}; });
+  function setChoice(ri, item, values) {
+    inputs(ri, item).forEach(function (i) { i.checked = values.indexOf(i.value) >= 0; });
+  }
+
+  function renderPanel(ri) {
+    if (byId('panel-' + ri)) return;
+    var r = rounds[ri], d = r.decisions;
+    var panel = el('section');
+    panel.id = 'panel-' + ri;
+    panel.setAttribute('role', historyMode ? 'region' : 'tabpanel');
+    panels.append(panel);
+    if (historyMode) {
+      panel.setAttribute('aria-label', r.title || r.file);
+      if (r.outcome) {
+        var out = el('div', 'outcome');
+        out.append(el('strong', '', L.outcome + ': '), document.createTextNode(r.outcome.line));
+        out.append(el('span', 'outcome-log', fmt(L.logged, {log: r.outcome.log, date: r.outcome.date})));
+        panel.append(out);
+      }
+      if (r.warning) panel.append(el('p', 'readonly-note warn', L.warning + ': ' + r.warning));
+      if (r.error) {
+        panel.append(el('p', 'readonly-note warn', L.error), el('pre', 'error-text', r.error));
+        return;
+      }
+    }
+    if (d.lang) panel.lang = String(d.lang).replace(/_/g, '-');
+    if (r.readonly && r.answers && r.answers.done) panel.append(el('p', 'readonly-note', L.readonly + (r.saved ? ' ' + when(r.saved) : '')));
+    var group = null;
+    d.items.forEach(function (item, n) {
+      if (item.group && item.group !== group) panel.append(el('h2', 'group', item.group));
+      group = item.group || group;
+      panel.append(renderItem(ri, item, n));
+    });
+    var free = el('section', 'item single');
+    var box = el('div');
+    var fl = el('label', 'ftitle', d.free_text.title || L.anything);
+    fl.htmlFor = 'r' + ri + '-free';
+    var fta = el('textarea');
+    fta.id = fl.htmlFor;
+    fta.placeholder = d.free_text.placeholder || '';
+    fta.maxLength = MAX_TEXT;
+    fta.dataset.round = ri;
+    box.append(fl, fta);
+    free.append(box);
+    panel.append(free);
+    if (wizard && !r.readonly) {
+      var row = el('div', 'accept-row');
+      var state = el('p', 'accept-state');
+      state.id = 'accept-state-' + ri;
+      state.setAttribute('aria-live', 'polite');
+      var accept = el('button', 'accept-round', L.acceptRound);
+      accept.type = 'button';
+      accept.id = 'accept-' + ri;
+      accept.addEventListener('click', function () { acceptRound(ri); });
+      row.append(state, accept);
+      panel.append(row);
+    }
+
+    // Restore the saved answers; an item without one starts at the recommendation.
+    var saved = r.answers;
+    d.items.forEach(function (item) {
+      var a = saved && saved.answers[item.id];
+      sources[ri][item.id] = (a && a.source) || (hasRec(item) ? 'recommended' : 'user');
+      var chosen = a ? a.choice : (r.readonly ? null : item.recommended);
+      setChoice(ri, item, chosen === undefined || chosen === null ? [] : (Array.isArray(chosen) ? chosen : [chosen]));
+      var ta = byId(key(ri, item) + '-c');
+      if (ta && a) ta.value = a.comment;
+      var other = byId(key(ri, item) + '-t');
+      if (other && a && a.other !== undefined) other.value = a.other;
+      if (item.marks) {
+        markState[ri][item.id] = ((a && a.marks) || []).map(function (m) { return {image: m.image, box: m.box.slice(), comment: m.comment}; });
+        drawMarks(ri, item);
+        listMarks(ri, item);
+      }
+    });
+    if (saved) byId('r' + ri + '-free').value = saved.free_text;
+    if (r.readonly) {
+      Array.prototype.forEach.call(panel.querySelectorAll('input, textarea'), function (i) { i.disabled = true; });
+    } else if (saved) {
+      status.textContent = L.resumed;
+    }
+  }
+
+  function collect(ri, done) {
+    var answers = {};
+    rounds[ri].decisions.items.forEach(function (item) {
+      var picked = inputs(ri, item).filter(function (i) { return i.checked; }).map(function (i) { return i.value; });
+      var ta = byId(key(ri, item) + '-c');
+      var a = {choice: item.select === 'many' ? picked : (picked[0] || null), comment: ta ? ta.value : '',
+        source: sources[ri][item.id]};
+      if (picked.indexOf(OTHER) >= 0) a.other = byId(key(ri, item) + '-t').value;
+      if (item.marks) a.marks = marksOf(ri, item);
+      answers[item.id] = a;
+    });
+    return {answers: answers, free_text: byId('r' + ri + '-free').value, done: !!done, accepted: wizard && accepted[ri],
+      rev: rev[ri]};
+  }
+
+  var chain = Promise.resolve(), timer = null, dirty = {}, finished = false, closed = {};
+  function clock() {
+    try { return new Date().toLocaleTimeString(root.lang); } catch (e) { return new Date().toLocaleTimeString(); }
+  }
+  function send(ri, done, keepalive) {
+    var sent = collect(ri, done);
+    var body = JSON.stringify(sent);
+    function failed() {
+      // An acceptance the server did not store is not one: show the round as open again.
+      if (sent.accepted && accepted[ri]) {
+        accepted[ri] = false;
+        refresh();
+      }
+      return false;
+    }
+    // keepalive bodies are capped at 64 KiB, counted in bytes
+    var small = new TextEncoder().encode(body).length < 60000;
+    return fetch('save/' + ri, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: body,
+      keepalive: !!keepalive && small, credentials: 'omit', cache: 'no-store'})
+      .then(function (r) {
+        if (r.ok) {
+          return r.json().then(function (j) { if (typeof j.rev === 'number') rev[ri] = j.rev; }, function () {})
+            .then(function () {
+              status.textContent = fmt(L.saved, {t: clock()});
+              if (done) {
+                closed[ri] = true;  // final on the server: stop taking edits that could no longer be saved
+                Array.prototype.forEach.call(byId('panel-' + ri).querySelectorAll('input, textarea, .mark-tools button'), function (i) { i.disabled = true; });
+              }
+              return true;
+            });
+        }
+        if (r.status === 400 || r.status === 409) {
+          return r.text().then(function (m) {
+            if (/another tab/.test(m)) {
+              // Another tab saved this round since: say so where it cannot be missed.
+              status.textContent = L.stale;
+              var banner = byId('banner');
+              banner.textContent = L.stale;
+              banner.classList.add('on');
+            } else {
+              status.textContent = /already done/.test(m) ? L.already : fmt(L.bad, {m: m.trim()});
+            }
+            return failed();
+          });
+        }
+        status.textContent = r.status === 413 ? L.tooLarge : fmt(L.couldNot, {s: r.status});
+        return failed();
+      }, function () {
+        status.textContent = L.offline;
+        return failed();
+      });
+  }
+  function save(keepalive) {
+    clearTimeout(timer);
+    var todo = Object.keys(dirty).map(Number);
+    dirty = {};
+    chain = chain.then(function () {
+      return todo.reduce(function (p, ri) {
+        return p.then(function () { return finished || closed[ri] ? false : send(ri, false, keepalive); });
+      }, Promise.resolve());
+    });
+    return chain;
+  }
+  function later(ri, ms) {
+    if (finished || historyMode) return;
+    if (accepted[ri] && !rounds[ri].readonly) {  // any change, a comment too, undoes the acceptance
+      accepted[ri] = false;
+      changed[ri] = true;
+      refresh();
+    }
+    clearTimeout(timer);
+    dirty[ri] = true;
+    status.textContent = L.saving;
+    timer = setTimeout(save, ms);
+  }
+
+  var active = editable.length ? editable[0] : 0;
+  var undo = rounds.map(function () { return null; });
+  function label(undoing) {
+    acceptButton.querySelector('.accept').hidden = undoing;
+    acceptButton.querySelector('.undo').hidden = !undoing;
+  }
+  function showHeader(d) {
+    byId('title').textContent = d.title;
+    document.title = d.title;
+    byId('intro').textContent = d.intro || '';
+    byId('intro-phone').textContent = d.intro || '';  // phones show it below the sticky header
+    var notice = byId('notice');
+    notice.textContent = d.notice || '';
+    notice.hidden = !d.notice;
+  }
+
+  if (historyMode) {
+    // ---- The page of past decisions: a filterable list, and the chosen round read only ----
+    [status, acceptButton, doneButton].forEach(function (b) { b.hidden = true; });
+    var minutes = data.timeout;
+    showHeader({title: fmt(L.historyTitle, {root: data.root}), intro: L.historyIntro,
+      notice: minutes ? fmt(L.historyNotice, {m: minutes}) : L.historyNoticeNever});
+    byId('layout').classList.add('split');
+    byId('history').hidden = false;
+    byId('h-text-label').textContent = L.search;
+    byId('h-from-label').textContent = L.from;
+    byId('h-from').placeholder = L.fromHint;
+    var list = byId('h-list'), items = [];
+    var choose = function (ri) {
+      Array.prototype.forEach.call(panels.children, function (p) { p.hidden = true; });
+      renderPanel(ri);
+      byId('panel-' + ri).hidden = false;
+      items.forEach(function (b, i) { if (i === ri) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current'); });
+      active = ri;
+      if (window.matchMedia('(max-width: 900px)').matches) byId('panel-' + ri).scrollIntoView();
+    };
+    rounds.forEach(function (r, ri) {
+      var li = el('li');
+      var b = el('button', 'h-entry');
+      b.type = 'button';
+      var top = el('span', 'h-top');
+      top.append(el('span', 'h-date', r.date), el('span', 'h-topic', r.topic + ' / ' + r.file));
+      var name = el('span', 'h-title', r.title || r.file);
+      if (r.tab && r.tab !== r.title) name.append(el('span', 'h-tab', r.tab));
+      var st = el('span', 'h-status st-' + r.status, L['st_' + r.status]);
+      b.append(top, name, st);
+      if (r.warning) b.append(el('span', 'h-warn', '⚠ ' + L.warning));
+      if (r.outcome) b.append(el('span', 'h-outcome', '→ ' + r.outcome.line));
+      b.addEventListener('click', function () { choose(ri); });
+      li.append(b);
+      list.append(li);
+      items.push(b);
+      r.search = [r.title, r.tab, r.topic, r.file, r.outcome && r.outcome.line, r.error].concat(
+        (r.decisions ? r.decisions.items : []).map(function (it) { return it.title; })).join(' ').toLowerCase();
+    });
+    var filter = function () {
+      // From is ISO text like the dates in the list (2026, 2026-01 or 2026-01-31), not the viewer's regional format.
+      var q = byId('h-text').value.trim().toLowerCase(), from = byId('h-from').value.trim(), shown = 0;
+      rounds.forEach(function (r, ri) {
+        var ok = (!q || r.search.indexOf(q) >= 0) && (!from || r.date >= from);
+        items[ri].parentNode.hidden = !ok;
+        if (ok) shown++;
+      });
+      byId('h-count').textContent = shown ? fmt(L.count, {n: shown, t: rounds.length}) : L.none;
+    };
+    byId('h-text').addEventListener('input', filter);
+    byId('h-from').addEventListener('input', filter);
+    filter();
+    if (rounds.length) choose(0); else panels.append(el('p', 'hint', L.pick));
+  } else {
+    rounds.forEach(function (r, ri) { renderPanel(ri); });
+    rounds.forEach(function (r, ri) {
+      if (rounds.length < 2) return;
+      var d = r.decisions;
+      var tab = el('button');
+      tab.type = 'button';
+      tab.id = 'tab-' + ri;
+      tab.setAttribute('role', 'tab');
+      tab.setAttribute('aria-controls', 'panel-' + ri);
+      byId('panel-' + ri).setAttribute('aria-labelledby', tab.id);
+      tabs.append(tab);
+    });
+    if (wizard) {
+      var sum = el('button', '', L.summary);
+      sum.type = 'button';
+      sum.id = 'tab-' + rounds.length;
+      sum.setAttribute('role', 'tab');
+      sum.setAttribute('aria-controls', 'panel-' + rounds.length);
+      tabs.append(sum);
+      var sp = el('section');
+      sp.id = 'panel-' + rounds.length;
+      sp.setAttribute('role', 'tabpanel');
+      sp.setAttribute('aria-labelledby', sum.id);
+      sp.hidden = true;
+      panels.append(sp);
+    }
+    if (rounds.length > 1) {
+      tabs.hidden = false;
+      tabs.setAttribute('aria-label', L.rounds);
+    }
+  }
+
+  // Tabs: the WAI-ARIA tabs pattern with automatic activation.
+  var tabButtons = Array.prototype.slice.call(tabs.querySelectorAll('[role=tab]'));
+  var SUMMARY = rounds.length;
+  function showRound(ri) {
+    active = ri;
+    tabButtons.forEach(function (t, i) {
+      byId('panel-' + i).hidden = i !== ri;
+      t.setAttribute('aria-selected', i === ri ? 'true' : 'false');
+      t.tabIndex = i === ri ? 0 : -1;
+    });
+    if (!tabButtons.length) byId('panel-0').hidden = false;
+    if (ri === SUMMARY) {
+      showHeader({title: L.summary, intro: L.summaryIntro});
+      acceptButton.hidden = true;
+      renderSummary();
+      return;
+    }
+    var d = rounds[ri].decisions;
+    showHeader(d);
+    acceptButton.hidden = rounds[ri].readonly || !d.items.some(hasRec);
+    label(!!undo[ri]);
+  }
+  function tabName(ri) { return rounds[ri].decisions.tab || rounds[ri].decisions.title; }
+  function missingRounds() { return editable.filter(function (ri) { return !accepted[ri] && !closed[ri]; }); }
+  var doneButtons = [doneButton];
+  // Done waits for every round to be accepted. It stays focusable and says why, instead of a silent grey button.
+  function refresh() {
+    tabButtons.forEach(function (tab, ri) {
+      if (ri === SUMMARY) return;
+      var done = rounds[ri].readonly || (wizard && accepted[ri]);
+      tab.replaceChildren();
+      if (done || (wizard && changed[ri])) {
+        var mark = el('span', done ? 'tick' : 'changed-mark', done ? '✓' : '↺');
+        mark.setAttribute('aria-hidden', 'true');
+        tab.append(mark);
+      }
+      tab.append(document.createTextNode(tabName(ri)));
+      var note = rounds[ri].readonly ? L.doneTab : !wizard ? '' : accepted[ri] ? L.acceptedTab : changed[ri] ? L.changedTab : '';
+      if (note) tab.append(el('span', 'visually-hidden', note));
+      var state = byId('accept-state-' + ri), button = byId('accept-' + ri);
+      if (state) {
+        state.textContent = accepted[ri] ? L.acceptedNote : changed[ri] ? L.changedNote : '';
+        state.className = 'accept-state' + (changed[ri] && !accepted[ri] ? ' changed' : '');
+        button.hidden = accepted[ri];
+      }
+    });
+    if (!wizard) return;
+    var count = editable.filter(function (ri) { return accepted[ri]; }).length;
+    var progress = byId('progress');
+    progress.hidden = false;
+    progress.textContent = fmt(L.progress, {n: count, t: editable.length});
+    var missing = missingRounds(), reason = byId('done-reason');
+    var text = !missing.length ? '' : missing.length === 1 ? fmt(L.missingOne, {r: tabName(missing[0])})
+      : fmt(L.missingMany, {n: missing.length, r: tabName(missing[0])});
+    reason.hidden = !text;
+    reason.textContent = text;
+    doneButtons.forEach(function (b) { b.setAttribute('aria-disabled', String(!!missing.length)); });
+    var summaryReason = byId('summary-reason');
+    if (summaryReason) {
+      summaryReason.hidden = !text;
+      summaryReason.textContent = text;
+    }
+    if (active === SUMMARY) renderSummary();
+  }
+  function goToMissing() {
+    var missing = missingRounds();
+    if (!missing.length) return;
+    showRound(missing[0]);
+    if (tabButtons[missing[0]]) tabButtons[missing[0]].focus();
+  }
+  byId('done-reason').addEventListener('click', goToMissing);
+  function acceptRound(ri) {
+    if (!wizard || rounds[ri].readonly || finished || closed[ri]) return;
+    accepted[ri] = true;
+    changed[ri] = false;
+    clearTimeout(timer);
+    dirty[ri] = true;
+    save();
+    refresh();
+    // On to the next round not accepted yet, or the summary when there is none.
+    var order = editable.filter(function (x) { return x > ri; }).concat(editable.filter(function (x) { return x < ri; }));
+    var next = order.filter(function (x) { return !accepted[x]; })[0];
+    var to = next === undefined ? SUMMARY : next;
+    showRound(to);
+    tabButtons[to].focus();
+  }
+  function choiceText(ri, item) {
+    var picked = inputs(ri, item).filter(function (i) { return i.checked; }).map(function (i) { return i.value; });
+    return {picked: picked, text: picked.map(function (v) {
+      if (v === OTHER) return L.other + ': ' + (byId(key(ri, item) + '-t').value || '–');
+      if (v === SKIP) return L.skipped;
+      return labelOf(item, v);
+    }).join(', ') || L.nothing};
+  }
+  function renderSummary() {
+    var panel = byId('panel-' + SUMMARY);
+    panel.replaceChildren();
+    rounds.forEach(function (r, ri) {
+      var box = el('section', 'summary-round');
+      var h = el('h2', '', tabName(ri) + ' · ' + (r.readonly ? L.doneTab.replace(/[()]/g, '').trim()
+        : accepted[ri] ? L.accepted : changed[ri] ? L.changedTab.replace(/[()]/g, '').trim() : L.notAccepted));
+      var list = el('ul', 'summary-list');
+      r.decisions.items.forEach(function (item, n) {
+        var c = choiceText(ri, item), li = el('li');
+        var go = el('button', 'link', (n + 1) + '. ' + item.title);
+        go.type = 'button';
+        go.addEventListener('click', function () {
+          showRound(ri);
+          var card = byId('panel-' + ri).querySelectorAll('.item[data-item]')[n];
+          focusItem(card);
+        });
+        li.append(go, el('span', 'summary-choice', c.text));
+        var rec = recList(item), flags = [];
+        var same = rec.length === c.picked.length && rec.every(function (x) { return c.picked.indexOf(x) >= 0; });
+        if (rec.length && !same) flags.push(L.differs);
+        if (c.picked.indexOf(OTHER) >= 0) flags.push(L.otherBadge);
+        if (c.picked.indexOf(SKIP) >= 0) flags.push(L.skipped);
+        var count = item.marks ? marksOf(ri, item).length : 0;
+        if (count) flags.push(count === 1 ? L.markBadge : fmt(L.marksBadge, {n: count}));
+        var ta = byId(key(ri, item) + '-c');
+        if (ta && ta.value.trim()) flags.push(L.commentBadge);
+        flags.forEach(function (f) { li.append(el('span', 'badge', f)); });
+        if (flags.length) li.classList.add('flag');
+        list.append(li);
+      });
+      box.append(h, list);
+      panel.append(box);
+    });
+    var end = el('div', 'summary-done');
+    var why = el('button', 'link reason');
+    why.type = 'button';
+    why.id = 'summary-reason';
+    why.addEventListener('click', goToMissing);
+    var done2 = el('button', 'primary', doneButton.textContent);
+    done2.type = 'button';
+    done2.setAttribute('aria-describedby', 'summary-reason');
+    done2.addEventListener('click', finish);
+    doneButtons = [doneButton, done2];
+    end.append(why, done2);
+    panel.append(end);
+    var missing = missingRounds();
+    why.hidden = !missing.length;
+    why.textContent = byId('done-reason').textContent;
+    done2.setAttribute('aria-disabled', String(!!missing.length));
+  }
+  tabs.addEventListener('click', function (e) {
+    var t = e.target.closest('[role=tab]');
+    if (t) showRound(tabButtons.indexOf(t));
+  });
+  tabs.addEventListener('keydown', function (e) {
+    var i = tabButtons.indexOf(e.target), n = tabButtons.length, next = null;
+    if (i < 0) return;
+    if (e.key === 'ArrowRight') next = (i + 1) % n;
+    else if (e.key === 'ArrowLeft') next = (i - 1 + n) % n;
+    else if (e.key === 'Home') next = 0;
+    else if (e.key === 'End') next = n - 1;
+    if (next === null) return;
+    e.preventDefault();
+    showRound(next);
+    tabButtons[next].focus();
+  });
+
+  // "Accept all" sets every item of the open round that has a recommendation to it, comments and marks untouched.
+  // A second click restores the choices from before; changing any item's options afterwards ends that undo.
+  acceptButton.addEventListener('click', function () {
+    var ri = active, items = rounds[ri].decisions.items;
+    if (undo[ri]) {
+      items.forEach(function (item) {
+        setChoice(ri, item, undo[ri][item.id].choice);
+        sources[ri][item.id] = undo[ri][item.id].source;
+      });
+      undo[ri] = null;
+    } else {
+      undo[ri] = {};
+      items.forEach(function (item) {
+        undo[ri][item.id] = {source: sources[ri][item.id],
+          choice: inputs(ri, item).filter(function (i) { return i.checked; }).map(function (i) { return i.value; })};
+        if (hasRec(item)) {
+          setChoice(ri, item, recList(item));
+          sources[ri][item.id] = 'accept_all';
+        }
+      });
+    }
+    label(!!undo[ri]);
+    later(ri, 150);
+  });
+
+  document.addEventListener('change', function (e) {
+    var t = e.target;
+    if (t.dataset.round === undefined) return;
+    var ri = Number(t.dataset.round);
+    if (t.dataset.item !== undefined && (t.type === 'radio' || t.type === 'checkbox')) {
+      if (t.type === 'checkbox' && t.checked) {
+        // Skip stands alone: ticking it clears the other boxes, ticking another box clears it.
+        document.getElementsByName(t.name).forEach(function (i) {
+          if (i !== t && (t.value === SKIP || i.value === SKIP)) i.checked = false;
+        });
+      }
+      sources[ri][t.dataset.item] = 'user';
+      if (undo[ri]) {
+        undo[ri] = null;
+        label(false);
+      }
+    }
+    later(ri, 250);
+  });
+  document.addEventListener('input', function (e) {
+    var t = e.target;
+    if (t.dataset.round === undefined || (t.tagName !== 'TEXTAREA' && t.type !== 'text')) return;
+    if (t.classList.contains('other-text')) {
+      var pick = byId(t.dataset.pick);
+      if (!pick.checked) {
+        pick.checked = true;
+        pick.dispatchEvent(new Event('change', {bubbles: true}));
+      }
+    }
+    later(Number(t.dataset.round), 800);
+  });
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'hidden' && Object.keys(dirty).length && !finished) save(true);
+  });
+
+  // One Done for every editable round: save them all first, so a bad one stops before any round is final.
+  function each(list, done) {
+    return list.reduce(function (p, ri) {
+      return p.then(function (ok) { return !ok ? false : (closed[ri] ? true : send(ri, done)); });
+    }, Promise.resolve(true));
+  }
+  function finish() {
+    if (finished) return;
+    if (wizard && missingRounds().length) {  // Done is not ready: say why and go there
+      status.textContent = byId('done-reason').textContent;
+      byId('done-reason').focus();
+      return;
+    }
+    doneButtons.forEach(function (b) { b.disabled = true; });
+    clearTimeout(timer);
+    dirty = {};
+    chain = chain.then(function () { return each(editable, false); })
+      .then(function (ok) { return ok && each(editable, true); });
+    chain.then(function (ok) {
+      if (!ok) { doneButtons.forEach(function (b) { b.disabled = false; }); return; }
+      finished = true;
+      acceptButton.disabled = true;
+      Array.prototype.forEach.call(document.querySelectorAll('main input, main textarea, .mark-tools button, .mark-row button'), function (i) { i.disabled = true; });
+      status.textContent = L.done;
+      var banner = byId('banner');
+      banner.textContent = L.doneBanner;
+      banner.classList.add('on');
+      window.scrollTo(0, 0);
+    });
+  }
+  doneButton.addEventListener('click', finish);
+
+  // Keyboard shortcuts. They never act while a text field has focus or a modifier key is held, so typing,
+  // browser shortcuts and screen reader commands keep working.
+  var help = byId('help');
+  [[['1–9'], L.kPick], [['j', 'k'], L.kMove], [['←', '→'], L.kTabs], [['←', '↑', '→', '↓'], L.kMark],
+    [['Ctrl', 'Enter'], L.kAccept], [['?'], L.kHelp],
+    [['Esc'], L.kClose]].forEach(function (row) {
+    var dt = el('dt');
+    row[0].forEach(function (k, i) {
+      if (i) dt.append(' ');
+      dt.append(el('kbd', '', k));
+    });
+    help.querySelector('#help-keys').append(dt, el('dd', '', row[1]));
+  });
+  function openHelp() { if (!help.open) help.showModal(); }
+  byId('help-open').addEventListener('click', openHelp);
+  byId('help-close').addEventListener('click', function () { help.close(); });
+  function typing(t) {
+    return !!t && (t.isContentEditable || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT'
+      || (t.tagName === 'INPUT' && t.type !== 'radio' && t.type !== 'checkbox'));
+  }
+  function focusItem(card) {
+    var target = card.querySelector('input:checked:not(:disabled)') || card.querySelector('input:not(:disabled)') || card;
+    target.focus();
+    card.scrollIntoView({block: 'nearest'});
+  }
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && !e.altKey && !historyMode && !typing(e.target) && !help.open) {
+      e.preventDefault();
+      if (!wizard) finish();
+      else if (active !== SUMMARY) acceptRound(active);
+      else finish();
+      return;
+    }
+    if (e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey || typing(e.target) || help.open) return;
+    if (e.key === '?') {
+      e.preventDefault();
+      openHelp();
+      return;
+    }
+    var panel = byId('panel-' + active);
+    if (!panel) return;
+    var cards = Array.prototype.slice.call(panel.querySelectorAll('.item[data-item]'));
+    var current = e.target.closest ? e.target.closest('.item[data-item]') : null;
+    var at = cards.indexOf(current);
+    if (e.key === 'j' || e.key === 'k') {
+      var next = at < 0 ? 0 : at + (e.key === 'j' ? 1 : -1);
+      if (next >= 0 && next < cards.length) {
+        e.preventDefault();
+        focusItem(cards[next]);
+      }
+      return;
+    }
+    if (/^[1-9]$/.test(e.key) && current) {
+      var input = current.querySelectorAll('input[type=radio], input[type=checkbox]')[Number(e.key) - 1];
+      if (!input || input.disabled) return;
+      e.preventDefault();
+      input.checked = input.type === 'radio' ? true : !input.checked;
+      input.focus();
+      input.dispatchEvent(new Event('change', {bubbles: true}));
+    }
+  });
+
+  if (!historyMode) {
+    showRound(active);
+    refresh();
+  }
+})();
+</script>
+</body>
+</html>

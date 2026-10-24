@@ -1,0 +1,19 @@
+{
+  "name": "signoff",
+  "displayName": "Signoff",
+  "version": "0.1.0",
+  "description": "A local decision page for coding agents: the agent lists its open decisions with mockups, highlight boxes, costs and a preselected recommendation; you answer in the browser and press Done.",
+  "author": { "name": "trustmeimlumi", "url": "https://github.com/trustmeimlumi" },
+  "homepage": "https://github.com/trustmeimlumi/signoff",
+  "repository": "https://github.com/trustmeimlumi/signoff",
+  "license": "MIT",
+  "keywords": ["decisions", "review", "human-in-the-loop", "mockups", "skill"],
+  "userConfig": {
+    "folder": {
+      "type": "string",
+      "title": "Decisions folder",
+      "description": "Where the agent keeps a topic folder per decision, relative to the project root or absolute. The past-decisions page reads the same folder.",
+      "default": ".signoff"
+    }
+  }
+}
